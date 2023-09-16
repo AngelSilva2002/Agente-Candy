@@ -4,7 +4,6 @@ import numpy as np
 import time
 from PIL import Image
 
-
 # Función para capturar una imagen del juego
 def capture_screenshot():
     screenshot = ImageGrab.grab()  # Captura una imagen de toda la pantalla
@@ -19,77 +18,53 @@ def process_screenshot(screenshot):
     # Esta parte dependerá de la estructura del juego y lo que deseas analizar.
 
     # Ejemplo: Recortar la imagen para obtener solo una región específica
-    game_region = screenshot[75:790, 125:920]  # Ajusta las coordenadas según tu juego verticaul-horizontal
+    game_region = screenshot[75:790, 125:920]  # Ajusta las coordenadas según tu juego vertical-horizontal
 
-    # Ejemplo: Aplicar un filtro de suavizado
-    #game_region = cv2.GaussianBlur(game_region, (15, 15), 0)
-
+    # Convierte la región del juego a escala de grises
+    game_region = cv2.cvtColor(game_region, cv2.COLOR_BGR2GRAY)
 
     return game_region
 
-def calculate_dominant_color(segment):
+# Función para identificar el tipo de dulce en un segmento
+def identify_candy(segment, reference_images):
+    best_match = None
+    best_match_score = float('-inf')
 
-    color_to_candy = {
-        (52, 177, 1): 'Verde',
-        (255, 1, 0): 'Rojo',
-        (252, 220, 3): 'Amarillo',
-        (18, 138, 255): 'Azul',
-        (255, 138, 13): 'Naranja',
-        (187, 37, 255): 'Morado',
-    }
-    
-    candy_type = 'Desconocido'
+    for candy, reference_image in reference_images.items():
+        # Realizar la coincidencia de plantillas
+        result = cv2.matchTemplate(segment, reference_image, cv2.TM_CCOEFF_NORMED)
 
-    # Convertir el segmento a formato HSV (Hue, Saturation, Value)
-    hsv_segment = cv2.cvtColor(segment, cv2.COLOR_BGR2HSV)
+        # Ajustar el umbral aquí para controlar la coincidencia
+        threshold = 0.03 # Ajusta este valor según tus necesidades
+        loc = np.where(result >= threshold)
 
-    for color, candy in color_to_candy.items():
-        lower_bound = np.array([color[0] - 10, 100, 100])
-        upper_bound = np.array([color[0] + 10, 255, 255])
+        # Procesa todas las coincidencias y encuentra la mejor
+        for pt in zip(*loc[::-1]):
+            if result[pt[1], pt[0]] > best_match_score:
+                best_match_score = result[pt[1], pt[0]]
+                best_match = candy
 
-        # Crear una máscara para el color específico
-        mask = cv2.inRange(hsv_segment, lower_bound, upper_bound)
-
-        # Encuentra los contornos en la máscara
-        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-        # Si se encuentra al menos un contorno, consideramos que el color está presente
-        if len(contours) > 0:
-            candy_type = candy
-            break
+    return best_match
 
 
-    return candy_type
-
-
-def process_game_board(game_board):
-
-    rows, cols, _ = game_board.shape
+# Función para procesar el tablero del juego
+def process_game_board(game_board, reference_images):
+    rows, cols = game_board.shape
     segment_size = (cols // 9, rows // 9)  # Tamaño de cada segmento
-    game_matrix = np.zeros((9, 9), dtype=int)
+    game_matrix = np.empty((9, 9), dtype=str)
 
     for i in range(9):
         for j in range(9):
             # Obtener el segmento actual
-
             segment = game_board[i * segment_size[1]:(i + 1) * segment_size[1], 
                                 j * segment_size[0]:(j + 1) * segment_size[0]]
 
-
-
-            # Calcular el color predominante en el segmento
-            color_mode = calculate_dominant_color(segment)
-
-            print(color_mode)
-            # Asignar un valor único a cada tipo de dulce basado en el color predominante
-            # Esto es un ejemplo; debes ajustarlo según tus colores y tipos de dulces
-            # if color_mode == 0:
-            #     game_matrix[i][j] = 1  # Tipo de dulce 1
-            # elif color_mode == 1:
-            #     game_matrix[i][j] = 2  # Tipo de dulce 2
-            # # Agrega más condiciones para otros colores y tipos de dulces
+            # Identificar el tipo de dulce en el segmento
+            candy_type = identify_candy(segment, reference_images)
+            game_matrix[i][j] = candy_type
 
     print(game_matrix) 
+
 # Función para guardar una imagen en un archivo
 def save_image(image, filename):
     image_pil = Image.fromarray(image)
@@ -98,17 +73,41 @@ def save_image(image, filename):
 # Ejemplo de uso
 if __name__ == "__main__":
     var = True
+    reference_images = {
+        # 'Verde': cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/verde.png', cv2.IMREAD_GRAYSCALE),
+        # 'Rojo': cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/rojo.png', cv2.IMREAD_GRAYSCALE),
+        # 'Naranja': cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/naranja.png', cv2.IMREAD_GRAYSCALE),
+        # 'Amarillo': cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/amarillo.png', cv2.IMREAD_GRAYSCALE),
+        # 'Azul': cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/azul.png', cv2.IMREAD_GRAYSCALE),
+        # 'Morado': cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/morado.png', cv2.IMREAD_GRAYSCALE),
+
+        # 'Verde2': cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/verde3.png', cv2.IMREAD_GRAYSCALE),
+        # 'Rojo2': cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/rojo3.png', cv2.IMREAD_GRAYSCALE),
+        # 'Naranja2': cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/naranja3.png', cv2.IMREAD_GRAYSCALE),
+        # 'Yellow2': cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/amarillo3.png', cv2.IMREAD_GRAYSCALE),
+        # 'Azul2': cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/azul3.png', cv2.IMREAD_GRAYSCALE),
+        # 'Morado2': cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/morado3.png', cv2.IMREAD_GRAYSCALE),
+    
+
+        'Verde': cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/verde2.png', cv2.IMREAD_GRAYSCALE),
+        'Rojo': cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/rojo2.png', cv2.IMREAD_GRAYSCALE),
+        'Naranja': cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/naranja2.png', cv2.IMREAD_GRAYSCALE),
+        'Yellow': cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/amarillo2.png', cv2.IMREAD_GRAYSCALE),
+        'Azul': cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/azul2.png', cv2.IMREAD_GRAYSCALE),
+        'Morado': cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/morado2.png', cv2.IMREAD_GRAYSCALE)
+    }
+
     while var:
-        #time.sleep(5)
+        time.sleep(5)
         screenshot = capture_screenshot()
         processed_image = process_screenshot(screenshot)
-        process_game_board = process_game_board(processed_image)
+        process_game_board(processed_image, reference_images)
         # Guardar la imagen procesada en un archivo (ajusta el nombre de archivo según sea necesario)
         save_image(processed_image, "captura_procesada.png")
 
         # Aquí puedes realizar más análisis o procesamiento de la imagen según tus necesidades.
 
         # Pausa antes de tomar otra captura (ajusta según sea necesario)
-        time.sleep(5)
+        #time.sleep(5)
 
-        var = False; 
+        var = False
