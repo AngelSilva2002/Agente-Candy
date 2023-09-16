@@ -18,35 +18,39 @@ def process_screenshot(screenshot):
     # Esta parte dependerá de la estructura del juego y lo que deseas analizar.
 
     # Ejemplo: Recortar la imagen para obtener solo una región específica
-    game_region = screenshot[75:790, 125:920]  # Ajusta las coordenadas según tu juego vertical-horizontal
+    game_region = screenshot[75:790, 125:920]  # Ajusta las coordenadas según tu juego (vertical-horizontal)
 
     # Convierte la región del juego a escala de grises
-    game_region = cv2.cvtColor(game_region, cv2.COLOR_BGR2GRAY)
+    game_region_gray = cv2.cvtColor(game_region, cv2.COLOR_BGR2GRAY)
 
-    return game_region
+    return game_region_gray
 
 # Función para identificar el tipo de dulce en un segmento
 def identify_candy(segment, reference_images):
     best_match = None
     best_match_score = float('-inf')
 
-    for candy, reference_image in reference_images.items():
-        # Realizar la coincidencia de plantillas
-        result = cv2.matchTemplate(segment, reference_image, cv2.TM_CCOEFF_NORMED)
+    for candy, reference_list in reference_images.items():
+        best_candy_score = float('-inf')
+        
+        for reference_image in reference_list:
+            # Realizar la coincidencia de plantillas
+            result = cv2.matchTemplate(segment, reference_image, cv2.TM_CCOEFF_NORMED)
 
-        # Ajustar el umbral aquí para controlar la coincidencia
-        threshold = 0.03 # Ajusta este valor según tus necesidades
-        loc = np.where(result >= threshold)
+            # Ajustar el umbral aquí para controlar la coincidencia
+            threshold = 0.01  # Ajusta este valor según tus necesidades
+            loc = np.where(result >= threshold)
 
-        # Procesa todas las coincidencias y encuentra la mejor
-        for pt in zip(*loc[::-1]):
-            if result[pt[1], pt[0]] > best_match_score:
-                best_match_score = result[pt[1], pt[0]]
-                best_match = candy
+            # Calcula la mejor coincidencia para esta imagen de referencia
+            if np.max(result) > best_candy_score:
+                best_candy_score = np.max(result)
+
+        # Actualiza el mejor tipo de dulce si es necesario
+        if best_candy_score > best_match_score:
+            best_match_score = best_candy_score
+            best_match = candy
 
     return best_match
-
-
 # Función para procesar el tablero del juego
 def process_game_board(game_board, reference_images):
     rows, cols = game_board.shape
@@ -73,29 +77,40 @@ def save_image(image, filename):
 # Ejemplo de uso
 if __name__ == "__main__":
     var = True
+
+    # Define las imágenes de referencia para cada tipo de dulce
     reference_images = {
-        # 'Verde': cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/verde.png', cv2.IMREAD_GRAYSCALE),
-        # 'Rojo': cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/rojo.png', cv2.IMREAD_GRAYSCALE),
-        # 'Naranja': cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/naranja.png', cv2.IMREAD_GRAYSCALE),
-        # 'Amarillo': cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/amarillo.png', cv2.IMREAD_GRAYSCALE),
-        # 'Azul': cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/azul.png', cv2.IMREAD_GRAYSCALE),
-        # 'Morado': cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/morado.png', cv2.IMREAD_GRAYSCALE),
-
-        # 'Verde2': cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/verde3.png', cv2.IMREAD_GRAYSCALE),
-        # 'Rojo2': cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/rojo3.png', cv2.IMREAD_GRAYSCALE),
-        # 'Naranja2': cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/naranja3.png', cv2.IMREAD_GRAYSCALE),
-        # 'Yellow2': cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/amarillo3.png', cv2.IMREAD_GRAYSCALE),
-        # 'Azul2': cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/azul3.png', cv2.IMREAD_GRAYSCALE),
-        # 'Morado2': cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/morado3.png', cv2.IMREAD_GRAYSCALE),
-    
-
-        'Verde': cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/verde2.png', cv2.IMREAD_GRAYSCALE),
-        'Rojo': cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/rojo2.png', cv2.IMREAD_GRAYSCALE),
-        'Naranja': cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/naranja2.png', cv2.IMREAD_GRAYSCALE),
-        'Yellow': cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/amarillo2.png', cv2.IMREAD_GRAYSCALE),
-        'Azul': cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/azul2.png', cv2.IMREAD_GRAYSCALE),
-        'Morado': cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/morado2.png', cv2.IMREAD_GRAYSCALE)
-    }
+    'Verde': [
+        cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/verde.png', cv2.IMREAD_GRAYSCALE),
+        cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/verde2.png', cv2.IMREAD_GRAYSCALE),
+        cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/verde3.png', cv2.IMREAD_GRAYSCALE)
+    ],
+    'Rojo': [
+        cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/rojo.png', cv2.IMREAD_GRAYSCALE),
+        cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/rojo2.png', cv2.IMREAD_GRAYSCALE),
+        cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/rojo3.png', cv2.IMREAD_GRAYSCALE)
+    ],
+    'Naranja': [
+        cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/naranja.png', cv2.IMREAD_GRAYSCALE),
+        cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/naranja2.png', cv2.IMREAD_GRAYSCALE),
+        cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/naranja3.png', cv2.IMREAD_GRAYSCALE)
+    ],
+    'Amarillo': [
+        cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/amarillo.png', cv2.IMREAD_GRAYSCALE),
+        cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/amarillo2.png', cv2.IMREAD_GRAYSCALE),
+        cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/amarillo3.png', cv2.IMREAD_GRAYSCALE)
+    ],
+    'Azul': [
+        cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/azul.png', cv2.IMREAD_GRAYSCALE),
+        cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/azul2.png', cv2.IMREAD_GRAYSCALE),
+        cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/azul3.png', cv2.IMREAD_GRAYSCALE)
+    ],
+    'Morado': [
+        cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/morado.png', cv2.IMREAD_GRAYSCALE),
+        cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/morado2.png', cv2.IMREAD_GRAYSCALE),
+        cv2.imread('D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/Images/morado3.png', cv2.IMREAD_GRAYSCALE)
+    ]
+}
 
     while var:
         time.sleep(5)
@@ -108,6 +123,6 @@ if __name__ == "__main__":
         # Aquí puedes realizar más análisis o procesamiento de la imagen según tus necesidades.
 
         # Pausa antes de tomar otra captura (ajusta según sea necesario)
-        #time.sleep(5)
+        # time.sleep(5)
 
         var = False
