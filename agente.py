@@ -37,24 +37,39 @@ candies_matrix = [
     ['R', 'B', 'G', 'G', 'R', 'G', 'R', 'R', 'R'],
 ]
 
-# Clase Agente: Define la clase del agente que jugará Candy Crush.
+# Clase Agente
 class Agente:
     def __init__(self, environment):
         # Inicializa el agente con su entorno (matriz de dulces actual).
         self.environment = environment
     
-    def calc_heuritsic(self, state_matrix):
+    def calc_heuritsic(self, state_matrix, ):
         # Función de evaluación (heurística) que calcula una puntuación heurística
-        # para el estado actual del juego representado por 'state_matrix'.
+        # para el estado  del juego representado por 'state_matrix'.
         heuristic = 0
         for i in range(9):
             for j in range(9):
+                # Evaluar dulces coincidentes en fila o columna
                 if i < 8:
                     if state_matrix[i][j] == state_matrix[i + 1][j]:
                         heuristic += 1
                 if j < 8:
                     if state_matrix[i][j] == state_matrix[i][j + 1]:
                         heuristic += 1
+
+                # Recompensar combinaciones especiales y dulces especiales
+                special_candies = ['S', 'T', 'U', 'V', 'W', 'X', 'A', 'C', 'D', 'E', 'F', 'I', 'J']
+                if state_matrix[i][j] in special_candies:
+                    heuristic += 2 
+
+                # Recompensar combinaciones en forma de T o L
+                if i < 7 and j < 7:
+                    if (state_matrix[i][j] == state_matrix[i + 1][j] == state_matrix[i + 2][j + 1]) or \
+                       (state_matrix[i][j] == state_matrix[i + 1][j] == state_matrix[i + 2][j - 1]) or \
+                       (state_matrix[i][j] == state_matrix[i][j + 1] == state_matrix[i + 1][j + 2]) or \
+                       (state_matrix[i][j] == state_matrix[i][j + 1] == state_matrix[i + 1][j - 2]):
+                        heuristic += 3  # Recompensa combinaciones en forma de T o L
+
                 
 
         return heuristic
