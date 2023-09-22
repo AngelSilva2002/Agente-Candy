@@ -1,3 +1,7 @@
+import time
+
+
+
 # Convención de colores:
 """
     G = Verde
@@ -24,6 +28,7 @@
     J = Bomba de color
 """
 
+
 # Matriz de prueba
 candies_matrix = [
     ['Y', 'Y', 'R', 'O', 'O', 'G', 'G', 'G', 'B'],
@@ -31,9 +36,9 @@ candies_matrix = [
     ['G', 'O', 'Y', 'R', 'Y', 'R', 'Y', 'Y', 'O'],
     ['Y', 'Y', 'R', 'G', 'Y', 'Y', 'O', 'Y', 'B'],
     ['Y', 'G', 'O', 'Y', 'Y', 'Y', 'Y', 'Y', 'R'],
-    ['Y', 'Y', 'Y', 'R', 'Y', 'R', 'Y', 'B', 'B'],
+    ['Y', 'Y', 'Y', 'R', 'Y', 'R', 'A', 'B', 'B'],
     ['Y', 'G', 'Y', 'Y', 'G', 'R', 'Y', 'P', 'B'],
-    ['R', 'Y', 'G', 'B', 'Y', 'O', 'Y', 'R', 'R'],
+    ['R', 'Y', 'C', 'B', 'Y', 'O', 'Y', 'R', 'R'],
     ['R', 'B', 'G', 'G', 'R', 'G', 'R', 'R', 'R'],
 ]
 
@@ -43,9 +48,10 @@ class Agente:
         # Inicializa el agente con su entorno (matriz de dulces actual).
         self.environment = environment
     
-    def calc_heuritsic(self, state_matrix, ):
+    def calc_heuritsic(self, state_matrix ):
         # Función de evaluación (heurística) que calcula una puntuación heurística
         # para el estado  del juego representado por 'state_matrix'.
+        st = time.time()
         heuristic = 0
         for i in range(9):
             for j in range(9):
@@ -70,6 +76,14 @@ class Agente:
                        (state_matrix[i][j] == state_matrix[i][j + 1] == state_matrix[i + 1][j - 2]):
                         heuristic += 3  # Recompensa combinaciones en forma de T o L
 
-                
-
+        et = time.time()
+        print("Tiempo de ejecución del cálculo de la heurística: ", et - st, "segundos")
         return heuristic
+
+
+
+
+
+agente = Agente(candies_matrix)
+
+print(agente.calc_heuritsic(candies_matrix))
