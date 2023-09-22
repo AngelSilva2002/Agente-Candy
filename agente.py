@@ -51,7 +51,10 @@ class Agente:
     def calc_heuritsic(self, state_matrix ):
         # Función de evaluación (heurística) que calcula una puntuación heurística
         # para el estado  del juego representado por 'state_matrix'.
+
+        # Inicializar el tiempo de ejecución
         st = time.time()
+        #################################
 
         # Lista de dulces especiales
         special_candies = ['S', 'T', 'U', 'V', 'W', 'X', 'A', 'C', 'D', 'E', 'F', 'I', 'J']
@@ -80,8 +83,11 @@ class Agente:
                        (state_matrix[i][j] == state_matrix[i][j + 1] == state_matrix[i + 1][j - 2]):
                         heuristic += 3
 
+        # Imprimir el tiempo de ejecución
         et = time.time()
         print("Tiempo de ejecución del cálculo de la heurística: ", et - st, "segundos")
+        #################################
+
         return heuristic
 
 
