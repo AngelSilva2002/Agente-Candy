@@ -67,7 +67,13 @@ def process_game_board(game_board, reference_images):
             candy_type = identify_candy(segment, reference_images)
             game_matrix[i][j] = candy_type
 
-    print(game_matrix) 
+    print(game_matrix)
+    
+    # Imprimir la matriz de dulces en un formato legible
+    print("[")
+    for fila in game_matrix:
+        print("    ['" + "', '".join(map(str, fila)) + "'],")
+    print("]")
 
 # Función para guardar una imagen en un archivo
 def save_image(image, filename):
@@ -79,7 +85,7 @@ if __name__ == "__main__":
     var = True
 
     # Define las imágenes de referencia para cada tipo de dulce
-    """reference_images = {
+    reference_images = {
         'G-Verde': [
             cv2.imread('/home/davidrg02/Documentos/UNAL/SEMESTRE VIII/Sistemas inteligentes/Agente-Candy/Images/verde.png', cv2.IMREAD_GRAYSCALE),
             cv2.imread('/home/davidrg02/Documentos/UNAL/SEMESTRE VIII/Sistemas inteligentes/Agente-Candy/Images/verde2.png', cv2.IMREAD_GRAYSCALE),
@@ -110,8 +116,9 @@ if __name__ == "__main__":
             cv2.imread('/home/davidrg02/Documentos/UNAL/SEMESTRE VIII/Sistemas inteligentes/Agente-Candy/Images/morado2.png', cv2.IMREAD_GRAYSCALE),
             cv2.imread('/home/davidrg02/Documentos/UNAL/SEMESTRE VIII/Sistemas inteligentes/Agente-Candy/Images/morado3.png', cv2.IMREAD_GRAYSCALE)
         ]
-    }"""
+    }
 
+    """
     reference_images = {
         'G-Verde': [
             cv2.imread('/home/davidrg02/Documentos/UNAL/SEMESTRE VIII/Sistemas inteligentes/Agente-Candy/Image/green.png', cv2.IMREAD_GRAYSCALE),
@@ -144,6 +151,7 @@ if __name__ == "__main__":
             cv2.imread('/home/davidrg02/Documentos/UNAL/SEMESTRE VIII/Sistemas inteligentes/Agente-Candy/Images/morado3.png', cv2.IMREAD_GRAYSCALE)
         ]
     }
+    """
 
     while var:
         time.sleep(2)
