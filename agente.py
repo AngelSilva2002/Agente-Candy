@@ -52,6 +52,10 @@ class Agente:
         # Función de evaluación (heurística) que calcula una puntuación heurística
         # para el estado  del juego representado por 'state_matrix'.
         st = time.time()
+
+        # Lista de dulces especiales
+        special_candies = ['S', 'T', 'U', 'V', 'W', 'X', 'A', 'C', 'D', 'E', 'F', 'I', 'J']
+
         heuristic = 0
         for i in range(9):
             for j in range(9):
@@ -64,7 +68,7 @@ class Agente:
                         heuristic += 1
 
                 # Recompensar combinaciones especiales y dulces especiales
-                special_candies = ['S', 'T', 'U', 'V', 'W', 'X', 'A', 'C', 'D', 'E', 'F', 'I', 'J']
+                
                 if state_matrix[i][j] in special_candies:
                     heuristic += 2 
 
@@ -74,7 +78,7 @@ class Agente:
                        (state_matrix[i][j] == state_matrix[i + 1][j] == state_matrix[i + 2][j - 1]) or \
                        (state_matrix[i][j] == state_matrix[i][j + 1] == state_matrix[i + 1][j + 2]) or \
                        (state_matrix[i][j] == state_matrix[i][j + 1] == state_matrix[i + 1][j - 2]):
-                        heuristic += 3  # Recompensa combinaciones en forma de T o L
+                        heuristic += 3
 
         et = time.time()
         print("Tiempo de ejecución del cálculo de la heurística: ", et - st, "segundos")
