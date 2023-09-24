@@ -129,13 +129,9 @@ class Agente:
 
         # Calcular la heurística de cada estado posible
         heuristics = [self.calc_heuritsic(state) for state in possible_states]
-        print(len(heuristics))
-
-        #print (heuristics)
 
         # Obtener el índice del estado con la heurística más alta
         best_state_index = heuristics.index(max(heuristics))
-        print(best_state_index)
 
         # Obtener las coordenadas de los dulces que se intercambian para generar el estado con la heurística más alta
         candy_coordinates = [(i, j) for i in range(9) for j in range(9)]
@@ -144,11 +140,30 @@ class Agente:
 
         
         return (x1, y1, x2, y2)
+    
+    def generate_move(self):
+        coord1x, coord1y, coord2x, coord2y = self.choose_best_state()
+
+        coordIniciales = (coord1x, coord1y)
+        coordFinales = (coord2x, coord2y)
+
+        # Calcular la acción a realizar a partir de la primera coordenada (rigth, left, up, down)
+        if coordIniciales[0] == coordFinales[0]:
+            if coordIniciales[1] < coordFinales[1]:
+                accion = "derecha"
+            else:
+                accion = "izquierda"
+        else:
+            if coordIniciales[0] < coordFinales[0]:
+                accion = "abajo"
+            else:
+                accion = "arriba"
+        
+        return coordIniciales, accion
+
 
 
 
 agente = Agente(candies_matrix)
 
-print((agente.generate_states_matrix())[171])
-
-print(agente.choose_best_state())
+print(agente.generate_move())
