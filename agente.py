@@ -126,20 +126,36 @@ class Agente:
         possible_states = self.generate_states_matrix()
 
 
-
         # Calcular la heurística de cada estado posible
         heuristics = [self.calc_heuritsic(state) for state in possible_states]
 
         # Obtener el índice del estado con la heurística más alta
         best_state_index = heuristics.index(max(heuristics))
+        print(best_state_index)
 
-        # Obtener las coordenadas de los dulces que se intercambian para generar el estado con la heurística más alta
-        candy_coordinates = [(i, j) for i in range(9) for j in range(9)]
-        x1, y1 = candy_coordinates[best_state_index // 4]
-        x2, y2 = x1 + (best_state_index % 4 - 1) % 2, y1 + (best_state_index % 4 - 2) % 2
+        # Obtener el estado con la puntuación heurística más alta
+        best_state = possible_states[best_state_index]
 
+        # Encontrar las coordenadas de los elementos que difieren entre la matriz original y el mejor estado
+        coordx1 = None
+        coordy1 = None
+        coordx2 = None
+        coordy2 = None
         
-        return (x1, y1, x2, y2)
+
+        for x in range(9):
+            for y in range(9):
+                if self.environment[x][y] != best_state[x][y]:
+                    if coordx1 == None:
+                        coordx1 = x
+                        coordy1 = y
+                    else:
+                        coordx2 = x
+                        coordy2 = y
+                    
+
+        # Devolver el movimiento (x1, y1, x2, y2)
+        return (coordx1, coordy1, coordx2, coordy2)
     
     def generate_move(self):
         coord1x, coord1y, coord2x, coord2y = self.choose_best_state()
@@ -162,8 +178,19 @@ class Agente:
         return coordIniciales, accion
 
 
-
-
 agente = Agente(candies_matrix)
 
+for i in range(9):
+    for j in range(9):
+        print(candies_matrix[i][j], end=' ')
+    print()
+print("----------------------")
+
+for i in range(9):
+    for j in range(9):
+        print(agente.generate_states_matrix()[171][i][j], end=' ')
+
+    print()
+
+print(agente.choose_best_state())
 print(agente.generate_move())
