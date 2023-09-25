@@ -4,21 +4,24 @@ import time
 # Dimensiones del tablero y del espacio en la pantalla
 filas = 9
 columnas = 9
-espacio_x_min = 75
-espacio_x_max = 790
-espacio_y_min = 125
-espacio_y_max = 920
+espacio_x_min = 130
+espacio_x_max = 794
+espacio_y_min = 79
+espacio_y_max = 707
 
 # Calcular el tamaño de cada celda en función del espacio en la pantalla y las dimensiones del tablero
-celda_width = (espacio_x_max - espacio_x_min) // columnas
-celda_height = (espacio_y_max - espacio_y_min) // filas
+celda_width = 90
+celda_height = 80
 
 # Coordenadas del punto de inicio en la esquina superior izquierda del espacio en la pantalla
-inicio_x = espacio_x_min + celda_width // 2
-inicio_y = espacio_y_min + celda_height // 2
+inicio_x = (espacio_x_min + celda_width//2) -7 #169
+inicio_y = (espacio_y_min +  celda_height //2) - 7 #112
 
 # Función para realizar un movimiento en una dirección
 def hacer_movimiento(fila, columna, direccion):
+
+    fila = fila - 1
+    columna = columna - 1
     # Calcular la posición del centro de la celda deseada
     x = inicio_x + columna * celda_width
     y = inicio_y + fila * celda_height
@@ -26,21 +29,22 @@ def hacer_movimiento(fila, columna, direccion):
     # Mover el mouse a la celda deseada en la región del juego
     pyautogui.moveTo(x, y)
 
+    time.sleep(0.4)
     # Mantener clic presionado
     pyautogui.mouseDown()
 
     # Esperar un momento para simular el arrastre
-    time.sleep(0.5)
+    time.sleep(0.3)
 
     # Dependiendo de la dirección, mover el mouse
     if direccion == "arriba":
-        pyautogui.move(0, -celda_height, duration=0.5)
+        pyautogui.move(0, -90, duration=0.2)
     elif direccion == "abajo":
-        pyautogui.move(0, celda_height, duration=0.5)
+        pyautogui.move(0, 90, duration=0.2)
     elif direccion == "izquierda":
-        pyautogui.move(-celda_width, 0, duration=0.5)
+        pyautogui.move(-90, 0, duration=0.2)
     elif direccion == "derecha":
-        pyautogui.move(celda_width, 0, duration=0.5)
+        pyautogui.move(90, 0, duration=0.2)
 
     # Liberar el clic
     pyautogui.mouseUp()
@@ -58,7 +62,11 @@ def todos_movimientos(filas, columnas):
             # Pausa entre movimientos (ajusta según sea necesario)
             time.sleep(1)
 
-# Ejemplo de uso: Realizar todos los movimientos en un tablero 9x9
-hacer_movimiento(0,4,"derecha")
-hacer_movimiento(2,4, "derecha")
-hacer_movimiento(2,7, "derecha")
+import random
+
+# Realizar 100 movimientos aleatorios
+for _ in range(100):
+    fila = random.randint(1, 9)
+    columna = random.randint(1, 9)
+    direccion = random.choice(["izquierda", "derecha", "arriba", "abajo"])
+    hacer_movimiento(fila, columna, direccion)
