@@ -60,15 +60,27 @@ class Agente:
             for j in range(9):
                 # Premio por dulces coincidentes en filas
                 if j < 7:
-                    if state_matrix[i][j] == state_matrix[i][j + 1] == state_matrix[i][j + 2]:
-                        if state_matrix[i][j] in ['G', 'R', 'O', 'Y', 'B', 'P']:
-                            heuristic += 3
+                    count_in_row = 1  # Inicializar el contador de dulces coincidentes en fila
+                    for k in range(j + 1, min(j + 3, 9)):
+                        if state_matrix[i][k] == state_matrix[i][j]:
+                            count_in_row += 1
+                        else:
+                            break
+
+                    if count_in_row >= 3 and state_matrix[i][j] in ['G', 'R', 'O', 'Y', 'B', 'P']:
+                        heuristic += count_in_row * 1.5
 
                 # Premio por dulces coincidentes en columnas
                 if i < 7:
-                    if state_matrix[i][j] == state_matrix[i + 1][j] == state_matrix[i + 2][j]:
-                        if state_matrix[i][j] in ['G', 'R', 'O', 'Y', 'B', 'P']:
-                            heuristic += 3
+                    count_in_column = 1  # Inicializar el contador de dulces coincidentes en columna
+                    for k in range(i + 1, min(i + 3, 9)):
+                        if state_matrix[k][j] == state_matrix[i][j]:
+                            count_in_column += 1
+                        else:
+                            break
+
+                    if count_in_column >= 3 and state_matrix[i][j] in ['G', 'R', 'O', 'Y', 'B', 'P']:
+                        heuristic += count_in_column * 1.5
 
         
         # Premio si hay dulces coincidentes en forma de L
@@ -88,6 +100,37 @@ class Agente:
                         if state_matrix[i][j] in ['G', 'R', 'O', 'Y', 'B', 'P']:
                             heuristic += 10  # Agregar una recompensa significativa
         
+
+        # Premio si hay dulces coincidentes en forma de T
+        for i in range(9):
+            for j in range(9):
+                # Verificar si hay una T hacia la derecha (horizontal)
+                if j < 5 and i < 7:
+                    if state_matrix[i][j] == state_matrix[i][j + 1] == state_matrix[i][j + 2] == \
+                            state_matrix[i + 1][j + 1] == state_matrix[i + 2][j + 1]:
+                        if state_matrix[i][j] in ['G', 'R', 'O', 'Y', 'B', 'P']:
+                            heuristic += 10  # Agregar una recompensa significativa
+
+                # Verificar si hay una T hacia abajo (vertical)
+                if j < 7 and i < 5:
+                    if state_matrix[i][j] == state_matrix[i + 1][j] == state_matrix[i + 2][j] == \
+                            state_matrix[i + 1][j + 1] == state_matrix[i + 1][j + 2]:
+                        if state_matrix[i][j] in ['G', 'R', 'O', 'Y', 'B', 'P']:
+                            heuristic += 10  # Agregar una recompensa significativa
+
+                # Verificar si hay una T hacia la izquierda (horizontal)
+                if j > 1 and i < 7:
+                    if state_matrix[i][j] == state_matrix[i][j - 1] == state_matrix[i][j - 2] == \
+                            state_matrix[i + 1][j - 1] == state_matrix[i + 2][j - 1]:
+                        if state_matrix[i][j] in ['G', 'R', 'O', 'Y', 'B', 'P']:
+                            heuristic += 10  # Agregar una recompensa significativa
+
+                # Verificar si hay una T hacia arriba (vertical)
+                if j < 7 and i > 1:
+                    if state_matrix[i][j] == state_matrix[i - 1][j] == state_matrix[i - 2][j] == \
+                            state_matrix[i - 1][j + 1] == state_matrix[i - 1][j + 2]:
+                        if state_matrix[i][j] in ['G', 'R', 'O', 'Y', 'B', 'P']:
+                            heuristic += 10  # Agregar una recompensa significativa
 
         return heuristic
     
