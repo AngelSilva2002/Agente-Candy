@@ -240,6 +240,6 @@ class Agente:
         
         return coordIniciales[0], coordIniciales[1], accion
 
-agente = Agente(candies_matrix)
+#agente = Agente(candies_matrix)
 
-print(agente.generate_move())
+#print(agente.generate_move())

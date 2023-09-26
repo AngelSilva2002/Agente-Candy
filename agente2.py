@@ -32,15 +32,15 @@ import re
 
 # Matriz de prueba
 candies_matrix = [
-    ['R', 'G', 'B', 'Y', 'O', 'P', 'R', 'G', 'B'],
-    ['G', 'B', 'Y', 'O', 'P', 'R', 'G', 'B', 'Y'],
-    ['B', 'Y', 'O', 'P', 'R', 'G', 'B', 'Y', 'O'],
-    ['Y', 'O', 'P', 'R', 'G', 'B', 'Y', 'O', 'P'],
-    ['O', 'P', 'R', 'G', 'B', 'Y', 'O', 'P', 'R'],
-    ['P', 'R', 'G', 'B', 'Y', 'O', 'P', 'R', 'G'],
-    ['R', 'G', 'B', 'Y', 'O', 'P', 'R', 'G', 'B'],
-    ['G', 'B', 'Y', 'O', 'P', 'R', 'G', 'B', 'Y'],
-    ['B', 'Y', 'O', 'P', 'R', 'G', 'B', 'Y', 'O']
+    ['Y', 'Y', 'R', 'O', 'O', 'G', 'G', 'G', 'B'],
+    ['O', 'O', 'O', 'G', 'R', 'B', 'R', 'O', 'B'],
+    ['G', 'O', 'Y', 'R', 'Y', 'R', 'Y', 'Y', 'O'],
+    ['Y', 'Y', 'R', 'G', 'Y', 'Y', 'O', 'Y', 'B'],
+    ['Y', 'G', 'O', 'Y', 'A', 'J', 'Y', 'Y', 'R'],
+    ['Y', 'Y', 'Y', 'R', 'Y', 'R', 'A', 'B', 'B'],
+    ['Y', 'G', 'Y', 'Y', 'G', 'R', 'Y', 'P', 'B'],
+    ['R', 'Y', 'C', 'B', 'Y', 'O', 'Y', 'R', 'R'],
+    ['R', 'B', 'G', 'G', 'R', 'G', 'R', 'R', 'R'],
 ]
 
 # Clase Agente
@@ -201,29 +201,20 @@ class Agente:
         # Solo se generan los movimientos válidos.
 
         candy_coordinates = [(i, j) for i in range(9) for j in range(9)]
-
-        # Generar estados posibles
         possible_states = []
-        generated_states = set()
 
         for (x1, y1) in candy_coordinates:
             for (dx, dy) in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
                 x2, y2 = x1 + dx, y1 + dy
 
                 if 0 <= x2 < 9 and 0 <= y2 < 9:
-                    # Realizar una copia profunda de la matriz actual
-                    state = copy.deepcopy(self.environment)
                     # Intercambiar dulces solo si las coordenadas x2 e y2 son válidas
+                    state = [row[:] for row in self.environment]  # Copiar la matriz actual
                     state[x1][y1], state[x2][y2] = state[x2][y2], state[x1][y1]
-
-                    # Verificar si el estado generado ya ha sido generado antes
-                    state_key = str(state)
-                    if state_key not in generated_states:
-                        # Agregar el estado generado a la lista de estados posibles
-                        possible_states.append(state)
-                        generated_states.add(state_key)
+                    possible_states.append(state)
 
         return possible_states
+
 
 
     def choose_best_state(self):
@@ -232,33 +223,63 @@ class Agente:
         # Devuelve una tupla (x1, y1, x2, y2) que representa el movimiento de intercambio de dulces que genera el mejor estado posible.
 
         # Obtener la lista de estados posibles
-        candy_coordinates = [(i, j) for i in range(9) for j in range(9)]
-        possible_states = []
-        for (x1, y1) in candy_coordinates:
-            for (dx, dy) in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
-                x2, y2 = x1 + dx, y1 + dy
+        possible_states = self.generate_states_matrix()
 
-                if 0 <= x2 < 9 and 0 <= y2 < 9:
-                    # Realizar una copia profunda de la matriz actual
-                    state = copy.deepcopy(self.environment)
-                    # Intercambiar dulces solo si las coordenadas x2 e y2 son válidas
-                    state[x1][y1], state[x2][y2] = state[x2][y2], state[x1][y1]
-                    # Calcular la heurística del estado generado y agregarlo a la lista de estados posibles
-                    heapq.heappush(possible_states, (self.calc_heuristic(state), x1, y1, x2, y2))
 
-        if not possible_states:
-            # No hay movimientos válidos disponibles
-            return None
+        # Calcular la heurística de cada estado posible
+        heuristics = [self.calc_heuristic(state) for state in possible_states]
 
-        # Obtener las coordenadas de los dulces que se intercambian para generar el estado con la heurística más alta
-        _, x1, y1, x2, y2 = heapq.heappop(possible_states)
+        # Obtener el índice del estado con la heurística más alta
+        best_state_index = heuristics.index(max(heuristics))
+        print(best_state_index)
 
-        return (x1, y1, x2, y2)
+        # Obtener el estado con la puntuación heurística más alta
+        best_state = possible_states[best_state_index]
+
+        # Encontrar las coordenadas de los elementos que difieren entre la matriz original y el mejor estado
+        coordx1 = None
+        coordy1 = None
+        coordx2 = None
+        coordy2 = None
+        
+
+        for x in range(9):
+            for y in range(9):
+                if self.environment[x][y] != best_state[x][y]:
+                    if coordx1 == None:
+                        coordx1 = x
+                        coordy1 = y
+                    else:
+                        coordx2 = x
+                        coordy2 = y
+                    
+
+        # Devolver el movimiento (x1, y1, x2, y2)
+        return (coordx1, coordy1, coordx2, coordy2)
+    
+    def generate_move(self):
+        coord1x, coord1y, coord2x, coord2y = self.choose_best_state()
+
+        coordIniciales = (coord1x, coord1y)
+        coordFinales = (coord2x, coord2y)
+
+        # Calcular la acción a realizar a partir de la primera coordenada (rigth, left, up, down)
+        if coordIniciales[0] == coordFinales[0]:
+            if coordIniciales[1] < coordFinales[1]:
+                accion = "derecha"
+            else:
+                accion = "izquierda"
+        else:
+            if coordIniciales[0] < coordFinales[0]:
+                accion = "abajo"
+            else:
+                accion = "arriba"
+        
+        return coordIniciales, accion
+
 
 
 
 agente = Agente(candies_matrix)
 
-print(agente.choose_best_state())
-
-print(len(agente.generate_states_matrix()))
+print(agente.generate_move())

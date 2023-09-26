@@ -6,7 +6,7 @@ import time
 from PIL import Image
 from Actuadores_David import hacer_movimiento
 from reference_images import reference_images
-from agente3 import Agente
+from agente4 import Agente
 
 
 def capture_screenshot():
@@ -109,7 +109,7 @@ def process_game_board(game_board):
 
     game_matrix_color_match = game_matrix_color_match.tolist()
 
-    print(game_matrix_color_match)
+    #print(game_matrix_color_match)
     return game_matrix_color_match
 
 # Función para guardar una imagen en un archivo (MODIFICADA)
@@ -143,12 +143,12 @@ if __name__ == "__main__":
 
         agente = Agente(candies_matrix)
 
-        print(len(agente.generate_states_matrix()), "hola")
+        #print(len(agente.generate_states_matrix()), "hola")
 
-        print(agente.choose_best_state())
+        #print(agente.choose_best_state())
         print(agente.generate_move())
         hacer_movimiento(agente.generate_move()[0], agente.generate_move()[1], agente.generate_move()[2])
 
         # i  = i+1
 
-        var = False
+        #var = False
