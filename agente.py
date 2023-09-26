@@ -31,15 +31,15 @@ import time
 
 # Matriz de prueba
 candies_matrix = [
-    ['Y', 'Y', 'R', 'O', 'O', 'G', 'G', 'G', 'B'],
-    ['O', 'O', 'O', 'G', 'R', 'B', 'R', 'O', 'B'],
-    ['G', 'O', 'Y', 'R', 'Y', 'R', 'Y', 'Y', 'O'],
-    ['Y', 'Y', 'R', 'G', 'Y', 'Y', 'O', 'Y', 'B'],
-    ['Y', 'G', 'O', 'Y', 'A', 'J', 'Y', 'Y', 'R'],
-    ['Y', 'Y', 'Y', 'R', 'Y', 'R', 'A', 'B', 'B'],
-    ['Y', 'G', 'Y', 'Y', 'G', 'R', 'Y', 'P', 'B'],
-    ['R', 'Y', 'C', 'B', 'Y', 'O', 'Y', 'R', 'R'],
-    ['R', 'B', 'G', 'G', 'R', 'G', 'R', 'R', 'R'],
+['G','R','O','Y','G','G','O','R','G',],
+['R','G','B','R','O','B','G','G','R',],
+['G','O','P','O','G','O','Y','R','Y',],
+['B','G','B','R','R','O','O','P','G',],
+['G','Y','O','Y','R','G','Y','Y','O',],
+['O','P','R','P','P','Y','G','O','Y',],
+['B','P','G','G','O','B','P','G','B',],
+['R','B','P','O','O','R','B','P','P',],
+['O','P','O','P','Y','Y','G','B','G',],
 ]
 
 # Clase Agente
@@ -175,22 +175,11 @@ class Agente:
             else:
                 accion = "arriba"
         
-        return coordIniciales, accion
+        return coordIniciales[0], coordIniciales[1], accion
+
 
 
 agente = Agente(candies_matrix)
 
-for i in range(9):
-    for j in range(9):
-        print(candies_matrix[i][j], end=' ')
-    print()
-print("----------------------")
 
-for i in range(9):
-    for j in range(9):
-        print(agente.generate_states_matrix()[171][i][j], end=' ')
-
-    print()
-
-print(agente.choose_best_state())
 print(agente.generate_move())
