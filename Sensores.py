@@ -6,6 +6,8 @@ import time
 from PIL import Image
 from Actuadores import hacer_movimiento
 from reference_images import reference_images
+from agente4 import Agente
+
 
 
 
@@ -32,15 +34,17 @@ def process_image(image):
     return game_region
 
 
-def color_match_candy(segment):
+
+def color_match_candy(segment, i, j):
     # Define los umbrales de color en RGB
     umbrales = {
-        'rojo': (245, 1, 1),
-        'verde': (75, 223, 19),
-        'morado': (191, 31, 255),
-        'azul': (33, 151, 255),
-        'amarillo': (252, 227, 5),
-        'naranja': (255, 138, 11)
+        'Red': (245, 1, 1),
+        'Green': (75, 223, 19),
+        'Purple': (191, 31, 255),
+        'Blue': (33, 151, 255),
+        'Yellow': (252, 227, 5),
+        'Orange': (255, 138, 11),
+        'J-Coffe': (101, 55, 0)
     }
 
     # Convierte el segmento a un arreglo NumPy para cálculos más eficientes
@@ -62,34 +66,55 @@ def color_match_candy(segment):
 
     # Determina el color predominante en base a los conteos
     color_predominante = max(conteos_colores, key=lambda x: conteos_colores[x])
-    #dulce_final = identify_type(segment,color_predominante)
+    
+    if (color_predominante == 'J-Coffe'):
+        return color_predominante
+
+    if (i == 0 and j == 3) or (i == 0 and j == 4):
+
+        return color_predominante
+    
+    else:
+        dulce_final = es_dulce_rayado(segment, color_predominante, umbral_area=100, color_umbral=200)
 
 
+    return dulce_final
+
+
+
+def es_dulce_rayado(image, color_predominante, umbral_area=200, color_umbral=200):
+    
+    image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    
+    _, thresholded = cv2.threshold(image_gray, color_umbral, 255, cv2.THRESH_BINARY)
+    
+    contours, _ = cv2.findContours(thresholded, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    for contour in contours:
+        # Calcular el área del contorno
+        area = cv2.contourArea(contour)
+
+        # Contar píxeles blancos dentro del contorno
+        mask = np.zeros(image_gray.shape, dtype=np.uint8)
+        cv2.drawContours(mask, [contour], -1, (255), thickness=cv2.FILLED)
+        pixels_blancos = cv2.countNonZero(mask)
+
+        # Verificar si el contorno se ajusta a los criterios de dulce rayado
+        if area > umbral_area and pixels_blancos > 0:
+            if color_predominante == 'Yellow':
+                return 'V'
+            elif color_predominante == 'Blue':
+                return 'W'
+            elif color_predominante == 'Red':
+                return 'T'
+            elif color_predominante == 'Purple':
+                return 'X'
+            elif color_predominante == 'Green':
+                return 'S'
+            elif color_predominante == 'Orange':
+                return 'U'
+        
     return color_predominante
-
-def identify_type(segment, color):
-    segment_gray = cv2.cvtColor(segment, cv2.COLOR_BGR2GRAY)
-
-    # Obtener la lista de imágenes de referencia para el color y tipo de dulce
-    reference_list = reference_images.get(color, {})
-
-    # Inicializar el tipo de dulce como "normal"
-    dulce_type = "normal"
-
-    # Iterar a través de los tipos de dulces (rayado, envuelto)
-    for tipo in ["rayado", "envuelto"]:
-        for reference_image in reference_list.get(tipo, []):
-            # Realizar la coincidencia de plantillas con cada imagen de referencia
-            result = cv2.matchTemplate(segment_gray, reference_image, cv2.TM_CCOEFF_NORMED)
-            threshold = 0.9  # Ajusta este umbral según tus necesidades
-
-            # Si la coincidencia supera el umbral, asignar el tipo de dulce y salir del bucle
-            if np.max(result) >= threshold:
-                dulce_type = tipo
-                break
-
-    return dulce_type
-
     
     
 def process_game_board(game_board):
@@ -103,11 +128,15 @@ def process_game_board(game_board):
             segment = game_board[i * segment_size[1]:(i + 1) * segment_size[1], 
                                 j * segment_size[0]:(j + 1) * segment_size[0]]
 
-            candy_type_color_match = color_match_candy(segment)
+            candy_type_color_match = color_match_candy(segment, i, j)
 
             game_matrix_color_match[i][j] = candy_type_color_match
 
     print(game_matrix_color_match)
+    game_matrix_color_match = game_matrix_color_match.tolist()
+
+    #print(game_matrix_color_match)
+    return game_matrix_color_match
 
 # Función para guardar una imagen en un archivo (MODIFICADA)
 def save_image(image, filename):
@@ -131,13 +160,18 @@ if __name__ == "__main__":
         # save_image(loaded_image, "captura_procesada.png")
 
 
-        #Para trabajar tomando capturas
         time.sleep(1)
         screenshot = capture_screenshot()
         processed_image = process_screenshot(screenshot)
-        process_game_board(processed_image)
+        candies_matrix = process_game_board(processed_image)
         save_image(processed_image, "captura_procesada.png")
 
-        # i  = i+1
+        agente = Agente(candies_matrix)
 
-        var = False
+        print(len(agente.generate_states_matrix()), "hola")
+
+        print(agente.choose_best_state())
+        print(agente.generate_move())
+        hacer_movimiento(agente.generate_move()[0], agente.generate_move()[1], agente.generate_move()[2])
+
+     

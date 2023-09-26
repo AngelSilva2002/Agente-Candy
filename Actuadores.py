@@ -20,8 +20,7 @@ inicio_y = (espacio_y_min +  celda_height //2) - 7 #112
 # Función para realizar un movimiento en una dirección
 def hacer_movimiento(fila, columna, direccion):
 
-    fila = fila - 1
-    columna = columna - 1
+
     # Calcular la posición del centro de la celda deseada
     x = inicio_x + columna * celda_width
     y = inicio_y + fila * celda_height
