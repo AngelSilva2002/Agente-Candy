@@ -35,8 +35,8 @@ candies_matrix = [
     ['Y', 'O', 'G', 'R', 'P', 'O', 'W', 'P', 'P'],
     ['B', 'G', 'P', 'P', 'Y', 'Y', 'P', 'Y', 'O'],
     ['O', 'B', 'Y', 'G', 'P', 'P', 'Y', 'R', 'G'],
-    ['B', 'B', 'R', 'P', 'R', 'G', 'B', 'G', 'G'],
-    ['B', 'R', 'G', 'G', 'R', 'R', 'O', 'P', 'P'],
+    ['B', 'B', 'R', 'O', 'R', 'G', 'B', 'G', 'G'],
+    ['B', 'R', 'G', 'Y', 'R', 'R', 'O', 'P', 'P'],
     ['P', 'R', 'O', 'G', 'O', 'P', 'O', 'B', 'O'],
     ['O', 'O', 'G', 'O', 'P', 'P', 'R', 'G', 'Y'],
     ['P', 'P', 'Y', 'R', 'P', 'Y', 'P', 'O', 'B'],
@@ -80,6 +80,81 @@ class Agente:
                             heuristic += 5
                         elif state_matrix[i][j] == 'J':
                             heuristic += 6
+
+        # Premio por combinaciones especiales
+        for i in range(9):
+            for j in range(9):
+                # Premio por combinaciones en forma de T o L
+                if i < 7 and j < 7:
+                    if (state_matrix[i][j] == state_matrix[i + 1][j] == state_matrix[i + 2][j + 1]) or \
+                       (state_matrix[i][j] == state_matrix[i + 1][j] == state_matrix[i + 2][j - 1]) or \
+                       (state_matrix[i][j] == state_matrix[i][j + 1] == state_matrix[i + 1][j + 2]) or \
+                       (state_matrix[i][j] == state_matrix[i][j + 1] == state_matrix[i + 1][j - 2]):
+                        if state_matrix[i][j] in ['G', 'R', 'O', 'Y', 'B', 'P']:
+                            heuristic += 3
+                        elif state_matrix[i][j] in ['S', 'T', 'U', 'V', 'W', 'X']:
+                            heuristic += 4
+                        elif state_matrix[i][j] in ['A', 'C', 'D', 'E', 'F', 'I']:
+                            heuristic += 5
+                        elif state_matrix[i][j] == 'J':
+                            heuristic += 6
+
+        
+        # Premio si hay dos bombas de color seguidas
+        for i in range(9):
+            for j in range(9):
+                if i < 8:
+                    if state_matrix[i][j] == 'J' and state_matrix[i + 1][j] == 'J':
+                        heuristic += 25
+                if j < 8:
+                    if state_matrix[i][j] == 'J' and state_matrix[i][j + 1] == 'J':
+                        heuristic += 25
+
+        # Premio si hay un dulce rayado y un dulce envuelto seguidos
+        for i in range(9):
+            for j in range(9):
+                if i < 8:
+                    if (state_matrix[i][j] in ['S', 'T', 'U', 'V', 'W', 'X'] and state_matrix[i + 1][j] in ['A', 'C', 'D', 'E', 'F', 'I']) or \
+                       (state_matrix[i][j] in ['A', 'C', 'D', 'E', 'F', 'I'] and state_matrix[i + 1][j] in ['S', 'T', 'U', 'V', 'W', 'X']):
+                        heuristic += 10
+                if j < 8:
+                    if (state_matrix[i][j] in ['S', 'T', 'U', 'V', 'W', 'X'] and state_matrix[i][j + 1] in ['A', 'C', 'D', 'E', 'F', 'I']) or \
+                       (state_matrix[i][j] in ['A', 'C', 'D', 'E', 'F', 'I'] and state_matrix[i][j + 1] in ['S', 'T', 'U', 'V', 'W', 'X']):
+                        heuristic += 10
+
+        #Premio si hay dos dulces envueltos seguidos
+        for i in range(9):
+            for j in range(9):
+                if i < 8:
+                    if state_matrix[i][j] in ['A', 'C', 'D', 'E', 'F', 'I'] and state_matrix[i + 1][j] in ['A', 'C', 'D', 'E', 'F', 'I']:
+                        heuristic += 15
+                if j < 8:
+                    if state_matrix[i][j] in ['A', 'C', 'D', 'E', 'F', 'I'] and state_matrix[i][j + 1] in ['A', 'C', 'D', 'E', 'F', 'I']:
+                        heuristic += 15
+
+        # Premio si hay bomba de color y un dulce envuelto seguidos
+        for i in range(9):
+            for j in range(9):
+                if i < 8:
+                    if (state_matrix[i][j] == 'J' and state_matrix[i + 1][j] in ['A', 'C', 'D', 'E', 'F', 'I']) or \
+                       (state_matrix[i][j] in ['A', 'C', 'D', 'E', 'F', 'I'] and state_matrix[i + 1][j] == 'J'):
+                        heuristic += 20
+                if j < 8:
+                    if (state_matrix[i][j] == 'J' and state_matrix[i][j + 1] in ['A', 'C', 'D', 'E', 'F', 'I']) or \
+                       (state_matrix[i][j] in ['A', 'C', 'D', 'E', 'F', 'I'] and state_matrix[i][j + 1] == 'J'):
+                        heuristic += 20    
+        
+        # Premio si hay bomba de color y un dulce rayado seguidos
+        for i in range(9):
+            for j in range(9):
+                if i < 8:
+                    if (state_matrix[i][j] == 'J' and state_matrix[i + 1][j] in ['S', 'T', 'U', 'V', 'W', 'X']) or \
+                       (state_matrix[i][j] in ['S', 'T', 'U', 'V', 'W', 'X'] and state_matrix[i + 1][j] == 'J'):
+                        heuristic += 17
+                if j < 8:
+                    if (state_matrix[i][j] == 'J' and state_matrix[i][j + 1] in ['S', 'T', 'U', 'V', 'W', 'X']) or \
+                       (state_matrix[i][j] in ['S', 'T', 'U', 'V', 'W', 'X'] and state_matrix[i][j + 1] == 'J'):
+                        heuristic += 17
         
         return heuristic
     
