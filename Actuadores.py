@@ -65,8 +65,8 @@ def todos_movimientos(filas, columnas):
 import random
 
 # Realizar 100 movimientos aleatorios
-for _ in range(100):
-    fila = random.randint(1, 9)
-    columna = random.randint(1, 9)
-    direccion = random.choice(["izquierda", "derecha", "arriba", "abajo"])
-    hacer_movimiento(fila, columna, direccion)
+# for _ in range(100):
+#     fila = random.randint(1, 9)
+#     columna = random.randint(1, 9)
+#     direccion = random.choice(["izquierda", "derecha", "arriba", "abajo"])
+#     hacer_movimiento(fila, columna, direccion)
