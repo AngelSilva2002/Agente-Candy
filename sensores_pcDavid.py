@@ -1,10 +1,14 @@
+import random
 from PIL import ImageGrab
 import cv2
 import numpy as np
 import time
 from PIL import Image
+from Actuadores_David import hacer_movimiento
+from reference_images import reference_images
+from agente3 import Agente
 
-# Función para capturar una imagen del juego
+
 def capture_screenshot():
     screenshot = ImageGrab.grab()  # Captura una imagen de toda la pantalla
     screenshot = np.array(screenshot)  # Convierte la imagen en una matriz NumPy
@@ -12,7 +16,7 @@ def capture_screenshot():
 
 # Función para procesar la captura de pantalla
 def process_screenshot(screenshot):
-    game_region = screenshot[100:673,  104:744]  # Ajusta las coordenadas según tu juego (vertical-horizontal)
+    game_region = screenshot[100:673,  104:744]  
     return game_region
 
 # Función para cargar una imagen desde un archivo
@@ -26,34 +30,6 @@ def process_image(image):
     # Ajusta las coordenadas según tu imagen
     game_region = image[75:790, 125:920]
     return game_region
-
-def identify_candy(segment, reference_images):
-    best_match = None
-    best_match_score = float('-inf')
-    segment = cv2.cvtColor(segment, cv2.COLOR_BGR2GRAY)
-
-
-    for candy, reference_list in reference_images.items():
-        best_candy_score = float('-inf')
-        
-        for reference_image in reference_list:
-            # Realizar la coincidencia de plantillas
-            result = cv2.matchTemplate(segment, reference_image, cv2.TM_CCOEFF_NORMED)
-
-            # Ajustar el umbral aquí para controlar la coincidencia
-            threshold = 0.01  # Ajusta este valor según tus necesidades
-            loc = np.where(result >= threshold)
-
-            # Calcula la mejor coincidencia para esta imagen de referencia
-            if np.max(result) > best_candy_score:
-                best_candy_score = np.max(result)
-
-        # Actualiza el mejor tipo de dulce si es necesario
-        if best_candy_score > best_match_score:
-            best_match_score = best_candy_score
-            best_match = candy
-
-    return best_match
 
 
 def color_match_candy(segment):
@@ -86,11 +62,37 @@ def color_match_candy(segment):
 
     # Determina el color predominante en base a los conteos
     color_predominante = max(conteos_colores, key=lambda x: conteos_colores[x])
+    #dulce_final = identify_type(segment,color_predominante)
+
 
     return color_predominante
 
+def identify_type(segment, color):
+    segment_gray = cv2.cvtColor(segment, cv2.COLOR_BGR2GRAY)
+
+    # Obtener la lista de imágenes de referencia para el color y tipo de dulce
+    reference_list = reference_images.get(color, {})
+
+    # Inicializar el tipo de dulce como "normal"
+    dulce_type = "normal"
+
+    # Iterar a través de los tipos de dulces (rayado, envuelto)
+    for tipo in ["rayado", "envuelto"]:
+        for reference_image in reference_list.get(tipo, []):
+            # Realizar la coincidencia de plantillas con cada imagen de referencia
+            result = cv2.matchTemplate(segment_gray, reference_image, cv2.TM_CCOEFF_NORMED)
+            threshold = 0.9  # Ajusta este umbral según tus necesidades
+
+            # Si la coincidencia supera el umbral, asignar el tipo de dulce y salir del bucle
+            if np.max(result) >= threshold:
+                dulce_type = tipo
+                break
+
+    return dulce_type
+
     
-def process_game_board(game_board, reference_images_1):
+    
+def process_game_board(game_board):
     rows, cols, _ = game_board.shape
     segment_size = (cols // 9, rows // 9)
     game_matrix_identify = np.empty((9, 9), dtype=str)
@@ -105,13 +107,10 @@ def process_game_board(game_board, reference_images_1):
 
             game_matrix_color_match[i][j] = candy_type_color_match
 
-    # Imprimir la matriz de dulces en un formato legible
-    print("[")
-    for fila in game_matrix_color_match:
-        print("    ['" + "', '".join(map(str, fila)) + "'],")
-    print("]")
-    
-    
+    game_matrix_color_match = game_matrix_color_match.tolist()
+
+    print(game_matrix_color_match)
+    return game_matrix_color_match
 
 # Función para guardar una imagen en un archivo (MODIFICADA)
 def save_image(image, filename):
@@ -122,59 +121,34 @@ def save_image(image, filename):
 if __name__ == "__main__":
     var = True
 
-    # Define las imágenes de referencia para cada tipo de dulce
-    reference_images_1 = {
-        'G-Verde': [
-            cv2.imread('/home/davidrg02/Documentos/UNAL/SEMESTRE VIII/Sistemas inteligentes/Agente-Candy/Images/verde.png', cv2.IMREAD_GRAYSCALE),
-            cv2.imread('/home/davidrg02/Documentos/UNAL/SEMESTRE VIII/Sistemas inteligentes/Agente-Candy/Images/verde2.png', cv2.IMREAD_GRAYSCALE),
-            cv2.imread('/home/davidrg02/Documentos/UNAL/SEMESTRE VIII/Sistemas inteligentes/Agente-Candy/Images/verde3.png', cv2.IMREAD_GRAYSCALE)
-        ],
-        'R-Rojo': [
-            cv2.imread('/home/davidrg02/Documentos/UNAL/SEMESTRE VIII/Sistemas inteligentes/Agente-Candy/Images/rojo.png', cv2.IMREAD_GRAYSCALE),
-            cv2.imread('/home/davidrg02/Documentos/UNAL/SEMESTRE VIII/Sistemas inteligentes/Agente-Candy/Images/rojo2.png', cv2.IMREAD_GRAYSCALE),
-            cv2.imread('/home/davidrg02/Documentos/UNAL/SEMESTRE VIII/Sistemas inteligentes/Agente-Candy/Images/rojo3.png', cv2.IMREAD_GRAYSCALE)
-        ],
-        'O-Naranja': [
-            cv2.imread('/home/davidrg02/Documentos/UNAL/SEMESTRE VIII/Sistemas inteligentes/Agente-Candy/Images/naranja.png', cv2.IMREAD_GRAYSCALE),
-            cv2.imread('/home/davidrg02/Documentos/UNAL/SEMESTRE VIII/Sistemas inteligentes/Agente-Candy/Images/naranja2.png', cv2.IMREAD_GRAYSCALE),
-            cv2.imread('/home/davidrg02/Documentos/UNAL/SEMESTRE VIII/Sistemas inteligentes/Agente-Candy/Images/naranja3.png', cv2.IMREAD_GRAYSCALE)
-        ],
-        'Y-Amarillo': [
-            cv2.imread('/home/davidrg02/Documentos/UNAL/SEMESTRE VIII/Sistemas inteligentes/Agente-Candy/Images/amarillo.png', cv2.IMREAD_GRAYSCALE),
-            cv2.imread('/home/davidrg02/Documentos/UNAL/SEMESTRE VIII/Sistemas inteligentes/Agente-Candy/Images/amarillo2.png', cv2.IMREAD_GRAYSCALE),
-            cv2.imread('/home/davidrg02/Documentos/UNAL/SEMESTRE VIII/Sistemas inteligentes/Agente-Candy/Images/amarillo3.png', cv2.IMREAD_GRAYSCALE)
-        ],
-        'B-Azul': [
-            cv2.imread('/home/davidrg02/Documentos/UNAL/SEMESTRE VIII/Sistemas inteligentes/Agente-Candy/Images/azul.png', cv2.IMREAD_GRAYSCALE),
-            cv2.imread('/home/davidrg02/Documentos/UNAL/SEMESTRE VIII/Sistemas inteligentes/Agente-Candy/Images/azul2.png', cv2.IMREAD_GRAYSCALE),
-            cv2.imread('/home/davidrg02/Documentos/UNAL/SEMESTRE VIII/Sistemas inteligentes/Agente-Candy/Images/azul3.png', cv2.IMREAD_GRAYSCALE)
-        ],
-        'P-Morado': [
-            cv2.imread('/home/davidrg02/Documentos/UNAL/SEMESTRE VIII/Sistemas inteligentes/Agente-Candy/Images/morado.png', cv2.IMREAD_GRAYSCALE),
-            cv2.imread('/home/davidrg02/Documentos/UNAL/SEMESTRE VIII/Sistemas inteligentes/Agente-Candy/Images/morado2.png', cv2.IMREAD_GRAYSCALE),
-            cv2.imread('/home/davidrg02/Documentos/UNAL/SEMESTRE VIII/Sistemas inteligentes/Agente-Candy/Images/morado3.png', cv2.IMREAD_GRAYSCALE)
-        ]
-    }
-
-
+    
+   
     while var:
-        # #Para trabajar con la foto almacendada
+        
+        # # #Para trabajar con la foto almacendada
         # image_path = 'D:/Trabajos UN/2023-2/Sistemas inteligentes/Agente-Candy/captura_procesada.png'
         # loaded_image = load_image(image_path)
         
-        # process_game_board(loaded_image, reference_images_1)
+        # process_game_board(loaded_image)
 
         # save_image(loaded_image, "captura_procesada.png")
 
 
-        # print("Matriz utilizando color_match_candy:")
-        # print(game_matrix_color_match)
-
         #Para trabajar tomando capturas
-        time.sleep(3)
+        time.sleep(1)
         screenshot = capture_screenshot()
         processed_image = process_screenshot(screenshot)
-        process_game_board(processed_image, reference_images_1)
+        candies_matrix = process_game_board(processed_image)
         save_image(processed_image, "captura_procesada.png")
+
+        agente = Agente(candies_matrix)
+
+        print(len(agente.generate_states_matrix()), "hola")
+
+        print(agente.choose_best_state())
+        print(agente.generate_move())
+        hacer_movimiento(agente.generate_move()[0], agente.generate_move()[1], agente.generate_move()[2])
+
+        # i  = i+1
 
         var = False
