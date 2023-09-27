@@ -113,10 +113,79 @@ def es_dulce_rayado(image, color_predominante, umbral_area=200, color_umbral=200
                 return 'S'
             elif color_predominante == 'Orange':
                 return 'U'
+
         
+        es_envuelto = detectar_dulce_envuelto(image)
+
+        if es_envuelto == "envuelto":
+            if color_predominante == 'Yellow':
+                return 'E'
+            elif color_predominante == 'Blue':
+                return 'F'
+            elif color_predominante == 'Red':
+                return 'C'
+            elif color_predominante == 'Purple':
+                return 'I'
+            elif color_predominante == 'Green':
+                return 'G'
+            elif color_predominante == 'Orange':
+                return 'D'
+
     return color_predominante
     
-    
+
+def verificar_envoltura(image_gray, contour):
+    # Encuentra el centro del contorno
+    M = cv2.moments(contour)
+    cx = int(M["m10"] / M["m00"])
+    cy = int(M["m01"] / M["m00"])
+
+    # Crea un círculo alrededor del centro del contorno
+    radius = 10
+    circle = cv2.circle(image_gray, (cx, cy), radius, (0, 255, 0), 2)
+
+    # Verifica si hay un cambio de color significativo entre el círculo y el fondo
+    pixel_gray = image_gray[cy, cx]
+    pixel_center = circle[cy, cx]
+
+    return pixel_gray != pixel_center
+
+def detectar_dulce_envuelto(image):
+    # Convierte la imagen a escala de grises
+    image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    # Aplica el detector de bordes Canny
+    edges = cv2.Canny(image_gray, 100, 200)
+
+    # Encuentra contornos en los bordes detectados
+    contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    # Copia de la imagen original para dibujar contornos
+    image_with_contours = image.copy()
+
+    # Itera a través de los contornos y verifica si alguno tiene un área significativa
+    resultado = ""
+    for contour in contours:
+        area = cv2.contourArea(contour)
+        if area > 10:
+            # Aproxima el contorno a un polígono con menos vértices (triángulo, cuadrado, etc.)
+            epsilon = 0.04 * cv2.arcLength(contour, True)
+            approx = cv2.approxPolyDP(contour, epsilon, True)
+
+            # Si el polígono tiene cuatro lados, es muy probable que sea un rectángulo
+            if len(approx) == 4:
+                # Si el contorno es un rectángulo, es un dulce envuelto
+                resultado = "envuelto"
+                cv2.drawContours(image_with_contours, [contour], 0, (0, 255, 0), 2)
+            else:
+                # Si el contorno no es un rectángulo, es un dulce normal
+                resultado = "normal"
+                cv2.drawContours(image_with_contours, [contour], 0, (0, 255, 0), 2)
+
+    return resultado
+
+
+
 def process_game_board(game_board):
     rows, cols, _ = game_board.shape
     segment_size = (cols // 9, rows // 9)
@@ -127,9 +196,10 @@ def process_game_board(game_board):
         for j in range(9):
             segment = game_board[i * segment_size[1]:(i + 1) * segment_size[1], 
                                 j * segment_size[0]:(j + 1) * segment_size[0]]
-
+            
+            #save_image(segment, "dulce " + str(i) +str(j) + ".png")
             candy_type_color_match = color_match_candy(segment, i, j)
-
+           
             game_matrix_color_match[i][j] = candy_type_color_match
 
     print(game_matrix_color_match)
@@ -160,7 +230,6 @@ if __name__ == "__main__":
         # save_image(loaded_image, "captura_procesada.png")
 
 
-        time.sleep(1)
         screenshot = capture_screenshot()
         processed_image = process_screenshot(screenshot)
         candies_matrix = process_game_board(processed_image)
@@ -173,5 +242,5 @@ if __name__ == "__main__":
         print(agente.choose_best_state())
         print(agente.generate_move())
         hacer_movimiento(agente.generate_move()[0], agente.generate_move()[1], agente.generate_move()[2])
-
-     
+        
+        

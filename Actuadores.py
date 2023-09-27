@@ -28,12 +28,12 @@ def hacer_movimiento(fila, columna, direccion):
     # Mover el mouse a la celda deseada en la región del juego
     pyautogui.moveTo(x, y)
 
-    time.sleep(0.4)
+    time.sleep(0.2)
     # Mantener clic presionado
     pyautogui.mouseDown()
 
     # Esperar un momento para simular el arrastre
-    time.sleep(0.3)
+    time.sleep(0.2)
 
     # Dependiendo de la dirección, mover el mouse
     if direccion == "arriba":

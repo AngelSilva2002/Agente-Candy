@@ -30,9 +30,6 @@ def detectar_dulce_envuelto(image):
     # Copia de la imagen original para dibujar contornos
     image_with_contours = image.copy()
 
-    # Tamaño de la imagen
-    height, width = image_gray.shape
-
     # Itera a través de los contornos y verifica si alguno tiene un área significativa
     for contour in contours:
         area = cv2.contourArea(contour)
@@ -43,15 +40,13 @@ def detectar_dulce_envuelto(image):
 
             # Si el polígono tiene cuatro lados, es muy probable que sea un rectángulo
             if len(approx) == 4:
-                # Verifica si uno de los vértices está cerca de los bordes de la imagen
-                x, y, w, h = cv2.boundingRect(contour)
-                if x < 10 or y < 10 or x + w > width - 10 or y + h > height - 10:
-                    resultado = "Dulce envuelto"
-                else:
-                    resultado = "Dulce normal"
+                # Si el contorno es un rectángulo, es un dulce envuelto
+                resultado = "Dulce envuelto"
                 cv2.drawContours(image_with_contours, [contour], 0, (0, 255, 0), 2)
             else:
+                # Si el contorno no es un rectángulo, es un dulce normal
                 resultado = "Dulce normal"
+                cv2.drawContours(image_with_contours, [contour], 0, (0, 255, 0), 2)
 
     # Muestra la imagen con los contornos
     cv2.imshow("Imagen Procesada", image_with_contours)
