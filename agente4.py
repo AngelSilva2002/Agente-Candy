@@ -55,32 +55,83 @@ class Agente:
         heuristic = 0
 
         # Premio por dulces coincidentes en filas y columnas
-        
         for i in range(9):
             for j in range(9):
-                # Premio por dulces coincidentes en filas
-                if j < 7:
-                    count_in_row = 1  # Inicializar el contador de dulces coincidentes en fila
-                    for k in range(j + 1, min(j + 3, 9)):
-                        if state_matrix[i][k] == state_matrix[i][j]:
-                            count_in_row += 1
-                        else:
-                            break
+                current_candy = state_matrix[i][j]
+                if current_candy in ['G', 'R', 'O', 'Y', 'B', 'P']:
+                    normal_color = current_candy
+                    special_candy = None
+                    wrapped_candy = None
 
-                    if count_in_row >= 3 and state_matrix[i][j] in ['G', 'R', 'O', 'Y', 'B', 'P']:
-                        heuristic += count_in_row * 1.5
+                    # Identificar el tipo de dulce especial correspondiente al color normal
+                    if normal_color == 'G':
+                        special_candy = 'S'
+                        wrapped_candy = 'A'
+                    elif normal_color == 'R':
+                        special_candy = 'T'
+                        wrapped_candy = 'C'
+                    elif normal_color == 'O':
+                        special_candy = 'U'
+                        wrapped_candy = 'D'
+                    elif normal_color == 'Y':
+                        special_candy = 'V'
+                        wrapped_candy = 'E'
+                    elif normal_color == 'B':
+                        special_candy = 'W'
+                        wrapped_candy = 'F'
+                    elif normal_color == 'P':
+                        special_candy = 'X'
+                        wrapped_candy = 'I'
 
-                # Premio por dulces coincidentes en columnas
-                if i < 7:
-                    count_in_column = 1  # Inicializar el contador de dulces coincidentes en columna
-                    for k in range(i + 1, min(i + 3, 9)):
-                        if state_matrix[k][j] == state_matrix[i][j]:
-                            count_in_column += 1
-                        else:
-                            break
+                    # Premio por dulces coincidentes en filas
+                    if j < 7:
+                        count_in_row = 1  # Inicializar el contador de dulces coincidentes en fila
+                        special_count_in_row = 0  # Inicializar el contador de dulces especiales en fila
+                        wrapped_count_in_row = 0  # Inicializar el contador de dulces envueltos en fila
+                        for k in range(j + 1, min(j + 3, 9)):
+                            if state_matrix[i][k] == current_candy:
+                                count_in_row += 1
+                            elif state_matrix[i][k] == special_candy:
+                                special_count_in_row += 1
+                            elif state_matrix[i][k] == wrapped_candy:
+                                wrapped_count_in_row += 1
+                            else:
+                                break
 
-                    if count_in_column >= 3 and state_matrix[i][j] in ['G', 'R', 'O', 'Y', 'B', 'P']:
-                        heuristic += count_in_column * 1.5
+                        total_count_in_row = count_in_row + special_count_in_row + wrapped_count_in_row
+                        if total_count_in_row >= 3:
+                            if total_count_in_row == 3:
+                                heuristic += 5
+                            elif total_count_in_row == 4:
+                                heuristic += 8
+                            elif total_count_in_row >= 5:
+                                heuristic += 20
+
+                    # Premio por dulces coincidentes en columnas
+                    if i < 7:
+                        count_in_column = 1  # Inicializar el contador de dulces coincidentes en columna
+                        special_count_in_column = 0  # Inicializar el contador de dulces especiales en columna
+                        wrapped_count_in_column = 0  # Inicializar el contador de dulces envueltos en columna
+                        for k in range(i + 1, min(i + 3, 9)):
+                            if state_matrix[k][j] == current_candy:
+                                count_in_column += 1
+                            elif state_matrix[k][j] == special_candy:
+                                special_count_in_column += 1
+                            elif state_matrix[k][j] == wrapped_candy:
+                                wrapped_count_in_column += 1
+                            else:
+                                break
+
+                        total_count_in_column = count_in_column + special_count_in_column + wrapped_count_in_column
+                        if total_count_in_column >= 3:
+                            if total_count_in_column == 3:
+                                heuristic += 5
+                            elif total_count_in_column == 4:
+                                heuristic += 8
+                            elif total_count_in_column >= 5:
+                                heuristic += 20
+
+
 
         
         # Premio si hay dulces coincidentes en forma de L
@@ -131,6 +182,57 @@ class Agente:
                             state_matrix[i - 1][j + 1] == state_matrix[i - 1][j + 2]:
                         if state_matrix[i][j] in ['G', 'R', 'O', 'Y', 'B', 'P']:
                             heuristic += 10  # Agregar una recompensa significativa
+
+        # Detectar combinaciones de dulces especiales en el estado actual y premiarlas
+        for i in range(9):
+            for j in range(9):
+                if self.environment[i][j] != state_matrix[i][j]:
+                    # Verificar si se ha combinado un dulce especial
+                    if self.environment[i][j] in ['S', 'T', 'U', 'V', 'W', 'X'] and \
+                            state_matrix[i][j] in ['S', 'T', 'U', 'V', 'W', 'X']:
+                        heuristic += 15  # Combinación de dulces rayados (15 puntos)
+                    elif self.environment[i][j] in ['A', 'C', 'D', 'E', 'F', 'I'] and \
+                            state_matrix[i][j] in ['A', 'C', 'D', 'E', 'F', 'I']:
+                        heuristic += 20  # Combinación de dulces envueltos (20 puntos)
+                    elif self.environment[i][j] in ['S', 'T', 'U', 'V', 'W', 'X'] and \
+                            state_matrix[i][j] in ['A', 'C', 'D', 'E', 'F', 'I']:
+                        heuristic += 30 # Combinación de dulces rayados y envueltos (30 puntos)
+                    elif self.environment[i][j] in ['S', 'T', 'U', 'V', 'W', 'X'] and \
+                            state_matrix[i][j] in ['J']:
+                        heuristic += 40 # Combinación de dulces rayados y bomba de color (40 puntos)
+                    elif self.environment[i][j] in ['A', 'C', 'D', 'E', 'F', 'I'] and \
+                            state_matrix[i][j] in ['J']:
+                        heuristic += 40 # Combinación de dulces envueltos y bomba de color (40 puntos)
+                    elif self.environment[i][j] in ['J'] and state_matrix[i][j] in ['J']:
+                        heuristic += 50 # Combinación de bombas de color (50 puntos)
+
+        """# Verificar combinación de bomba de color con el dulce normal más repetido
+        bomba_de_color = None
+        dulce_normal_mas_repetido = None
+        max_repeticiones = 0
+
+        # Calcular el recuento de dulces en el estado actual
+        count = {}
+        for i in range(9):
+            for j in range(9):
+                dulce = state_matrix[i][j]
+                if dulce in count:
+                    count[dulce] += 1
+                else:
+                    count[dulce] = 1
+
+        for dulce, repeticiones in count.items():
+            if repeticiones > max_repeticiones and dulce not in ['S', 'T', 'U', 'V', 'W', 'X']:
+                dulce_normal_mas_repetido = dulce
+                max_repeticiones = repeticiones
+
+        # Verificar si hay combinación de bomba de color con el dulce normal más repetido
+        for i in range(9):
+            for j in range(9):
+                if state_matrix[i][j] == 'J' and dulce_normal_mas_repetido is not None:
+                    heuristic += 40  # Combinación de bomba de color con el dulce normal más repetido (40 puntos)"""
+
+
 
         return heuristic
     
