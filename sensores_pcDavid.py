@@ -149,39 +149,6 @@ def verificar_envoltura(image_gray, contour):
 
     return pixel_gray != pixel_center
 
-# def detectar_dulce_envuelto(image):
-#     # Convierte la imagen a escala de grises
-#     image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-#     # Aplica el detector de bordes Canny
-#     edges = cv2.Canny(image_gray, 100, 200)
-
-#     # Encuentra contornos en los bordes detectados
-#     contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-#     # Copia de la imagen original para dibujar contornos
-#     image_with_contours = image.copy()
-
-#     # Itera a través de los contornos y verifica si alguno tiene un área significativa
-#     resultado = ""
-#     for contour in contours:
-#         area = cv2.contourArea(contour)
-#         if area > 10:
-#             # Aproxima el contorno a un polígono con menos vértices (triángulo, cuadrado, etc.)
-#             epsilon = 0.04 * cv2.arcLength(contour, True)
-#             approx = cv2.approxPolyDP(contour, epsilon, True)
-
-#             # Si el polígono tiene cuatro lados, es muy probable que sea un rectángulo
-#             if len(approx) == 4:
-#                 # Si el contorno es un rectángulo, es un dulce envuelto
-#                 resultado = "envuelto"
-#                 cv2.drawContours(image_with_contours, [contour], 0, (0, 255, 0), 2)
-#             else:
-#                 # Si el contorno no es un rectángulo, es un dulce normal
-#                 resultado = "normal"
-#                 cv2.drawContours(image_with_contours, [contour], 0, (0, 255, 0), 2)
-
-#     return resultado
 
 def es_envuelto(imagen, color):
 
