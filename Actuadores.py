@@ -33,17 +33,17 @@ def hacer_movimiento(fila, columna, direccion):
     pyautogui.mouseDown()
 
     # Esperar un momento para simular el arrastre
-    time.sleep(0.15)
+    #time.sleep(0.15)
 
     # Dependiendo de la dirección, mover el mouse
     if direccion == "arriba":
-        pyautogui.move(0, -90, duration=0.2)
+        pyautogui.move(0, -90, duration=0.01)
     elif direccion == "abajo":
-        pyautogui.move(0, 90, duration=0.2)
+        pyautogui.move(0, 90, duration=0.01)
     elif direccion == "izquierda":
-        pyautogui.move(-90, 0, duration=0.2)
+        pyautogui.move(-90, 0, duration=0.01)
     elif direccion == "derecha":
-        pyautogui.move(90, 0, duration=0.2)
+        pyautogui.move(90, 0, duration=0.01)
 
     # Liberar el clic
     pyautogui.mouseUp()
