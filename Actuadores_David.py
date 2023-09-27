@@ -51,7 +51,7 @@ def hacer_movimiento(fila, columna, direccion):
 
 # Función para realizar todos los movimientos en cada celda
 def todos_movimientos(filas, columnas):
-    time.sleep(5)
+    time.sleep(2)
     for fila in range(filas):
         for columna in range(columnas):
             # Realizar movimientos hacia todas las direcciones en cada celda
@@ -60,7 +60,7 @@ def todos_movimientos(filas, columnas):
             hacer_movimiento(fila, columna, "izquierda")
             hacer_movimiento(fila, columna, "derecha")
             # Pausa entre movimientos (ajusta según sea necesario)
-            time.sleep(1)
+            time.sleep(0.3)
 
 import random
 
