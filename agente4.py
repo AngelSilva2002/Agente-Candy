@@ -233,7 +233,6 @@ class Agente:
                     heuristic += 40  # Combinación de bomba de color con el dulce normal más repetido (40 puntos)"""
 
 
-
         return heuristic
     
 
