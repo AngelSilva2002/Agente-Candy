@@ -5,7 +5,6 @@ import numpy as np
 import time
 from PIL import Image
 from Actuadores_David import hacer_movimiento
-from reference_images import reference_images
 from agente4 import Agente
 
 
