@@ -6,6 +6,7 @@ import time
 from PIL import Image
 from Actuadores_David import hacer_movimiento
 from agente4 import Agente
+import keyboard
 
 
 def capture_screenshot():
@@ -239,5 +240,8 @@ if __name__ == "__main__":
         # print(agente.choose_best_state())
         # print(agente.generate_move())
         hacer_movimiento(agente.generate_move()[0], agente.generate_move()[1], agente.generate_move()[2])
-        #var = False
+
+
+        if keyboard.is_pressed('q'):
+            var = False
         

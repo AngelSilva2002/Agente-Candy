@@ -29,29 +29,28 @@ def hacer_movimiento(fila, columna, direccion):
     # Mover el mouse a la celda deseada en la región del juego
     pyautogui.moveTo(x, y)
 
-    time.sleep(0.4)
+    #time.sleep(0.2)
     # Mantener clic presionado
     pyautogui.mouseDown()
 
     # Esperar un momento para simular el arrastre
-    time.sleep(0.3)
 
     # Dependiendo de la dirección, mover el mouse
     if direccion == "arriba":
-        pyautogui.move(0, -90, duration=0.2)
+        pyautogui.move(0, -90, duration=0.01)
     elif direccion == "abajo":
-        pyautogui.move(0, 90, duration=0.2)
+        pyautogui.move(0, 90, duration=0.01)
     elif direccion == "izquierda":
-        pyautogui.move(-90, 0, duration=0.2)
+        pyautogui.move(-90, 0, duration=0.01)
     elif direccion == "derecha":
-        pyautogui.move(90, 0, duration=0.2)
+        pyautogui.move(90, 0, duration=0.01)
 
     # Liberar el clic
     pyautogui.mouseUp()
 
 # Función para realizar todos los movimientos en cada celda
 def todos_movimientos(filas, columnas):
-    time.sleep(2)
+    #time.sleep(2)
     for fila in range(filas):
         for columna in range(columnas):
             # Realizar movimientos hacia todas las direcciones en cada celda
@@ -60,7 +59,7 @@ def todos_movimientos(filas, columnas):
             hacer_movimiento(fila, columna, "izquierda")
             hacer_movimiento(fila, columna, "derecha")
             # Pausa entre movimientos (ajusta según sea necesario)
-            time.sleep(0.3)
+            #time.sleep(0.1)
 
 import random
 
